@@ -162,61 +162,60 @@ class Plotter:
         plt.show()
 
     def plot_eval_results(
-        self, hyperparameter_to_analyze, seeds, batch_size_list, log_path
+        self, hyperparameter_to_analyze, seeds, iteretable_list, log_path
     ):
         # plot for respective hyperparameter
         assert hyperparameter_to_analyze is not None, "specify which parameter to plot"
 
-        if hyperparameter_to_analyze == "batch_size":
-            labels = []
-            for i, batch_size in enumerate(batch_size_list):
-                labels.append(batch_size)
-                color_patch = []
+        labels = []
+        for i, value in enumerate(iteretable_list):
+            labels.append(value)
+            color_patch = []
 
-                all_avg_return, all_min_return, all_max_return = [], [], []
-                for seed in seeds:
-                    progress_filename = (
-                        f"sac_batch_size_{str(batch_size)}_{seed}/progress.csv"
-                    )
-                    progress_filepath = os.path.join(log_path, progress_filename)
-
-                    # load pands
-                    logging_data = pd.read_csv(progress_filepath)
-
-                    # define x and y
-                    env_steps = logging_data["TotalEnvSteps"]
-                    avg_return = logging_data["Evaluation/AverageReturn"]
-                    min_return = logging_data["Evaluation/MinReturn"]
-                    max_return = logging_data["Evaluation/MaxReturn"]
-
-                    all_avg_return.append(avg_return)
-                    all_min_return.append(min_return)
-                    all_max_return.append(max_return)
-
-                # define color for the batch size
-                color_patch.append(mpatches.Patch(color=COLORS[i], label=batch_size))
-
-                all_avg_return = np.vstack(all_avg_return)
-                all_min_return = np.vstack(all_min_return)
-                all_max_return = np.vstack(all_max_return)
-
-                self.tsplot(
-                    self.ax,
-                    env_steps,
-                    all_avg_return,
-                    all_min_return,
-                    all_max_return,
-                    sliding_window=1,
-                    color_fill=COLORS[i],
-                    color_solid=COLORS[i],
-                    label=batch_size,
+            all_avg_return, all_min_return, all_max_return = [], [], []
+            for seed in seeds:
+                progress_filename = (
+                    f"sac_{hyperparameter_to_analyze}_{str(value)}_{seed}/progress.csv"
                 )
+                progress_filepath = os.path.join(log_path, progress_filename)
 
-            # plt.legend(
-            #     frameon=True, fancybox=True, handles=color_patch, loc="best",
-            # )
+                # load pands
+                logging_data = pd.read_csv(progress_filepath)
 
-            self.plot()
+                # define x and y
+                env_steps = logging_data["TotalEnvSteps"]
+                avg_return = logging_data["Evaluation/AverageReturn"]
+                min_return = logging_data["Evaluation/MinReturn"]
+                max_return = logging_data["Evaluation/MaxReturn"]
+
+                all_avg_return.append(avg_return)
+                all_min_return.append(min_return)
+                all_max_return.append(max_return)
+
+            # define color for the batch size
+            color_patch.append(mpatches.Patch(color=COLORS[i], label=value))
+
+            all_avg_return = np.vstack(all_avg_return)
+            all_min_return = np.vstack(all_min_return)
+            all_max_return = np.vstack(all_max_return)
+
+            self.tsplot(
+                self.ax,
+                env_steps,
+                all_avg_return,
+                all_min_return,
+                all_max_return,
+                sliding_window=1,
+                color_fill=COLORS[i],
+                color_solid=COLORS[i],
+                label=value,
+            )
+
+        # plt.legend(
+        #     frameon=True, fancybox=True, handles=color_patch, loc="best",
+        # )
+
+        self.plot()
 
 
 def main():
@@ -259,8 +258,15 @@ def main():
     env = benchmark_config_data["env"]
     seeds = benchmark_config_data["seeds"]
     algo = benchmark_config_data["algo"]
-    batch_size_list = benchmark_config_data["batch_size_list"]
     epochs = benchmark_config_data["epochs"]
+
+    batch_size_list = benchmark_config_data["batch_size_list"]
+    policy_net_sizes = benchmark_config_data["network_size"]["policy_net"]
+    q_function_net_sizes = benchmark_config_data["network_size"]["q_function_net"]
+    layer_normalization_choices = benchmark_config_data["layer_normalization"]
+    activation_functions_choices = benchmark_config_data["activation_functions"]
+    reward_scale_choices = benchmark_config_data["reward_scale"]
+
     log_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "data/local/experiment"
     )
@@ -272,10 +278,25 @@ def main():
     if args.test_plotting:
         plotter.test_plotting(args.logging_data_path)
 
+    # ["batch_size", "layer_normalization", "activation_functions", "policy_net", "q_function_net", "reward_scale"]
+
+    if hyperparameter_to_analyze == "batch_size":
+        iteretable_list = batch_size_list
+    elif hyperparameter_to_analyze == "layer_normalization":
+        iteretable_list = layer_normalization_choices
+    elif hyperparameter_to_analyze == "activation_functions":
+        iteretable_list = activation_functions_choices
+    elif hyperparameter_to_analyze == "policy_net":
+        iteretable_list = policy_net_sizes
+    elif hyperparameter_to_analyze == "q_function_net":
+        iteretable_list = q_function_net_sizes
+    elif hyperparameter_to_analyze == "reward_scale":
+        iteretable_list = reward_scale_choices
+
     plotter.plot_eval_results(
         hyperparameter_to_analyze=hyperparameter_to_analyze,
         seeds=seeds,
-        batch_size_list=batch_size_list,
+        iteretable_list=iteretable_list,
         log_path=log_path,
     )
 
