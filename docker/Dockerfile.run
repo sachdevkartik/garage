@@ -1,0 +1,9 @@
+FROM rlworkgroup/garage-nvidia:latest
+USER root
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN rm /etc/apt/sources.list.d/cuda.list
+RUN rm /etc/apt/sources.list.d/nvidia-ml.list
+
+RUN apt-get update

@@ -1,0 +1,21 @@
+algo: sac
+env: Hopper-v2 
+seeds: [756, 4239, 12345]
+epochs: 3
+
+batch_size_list: [1024, 2048, 4096]
+network_size:
+  policy_net: [[256, 256], [64, 64], [100, 50, 25]]
+  q_function_net:  [[256, 256], [64, 64], [100, 50, 25]]
+layer_normalization: [False, True]
+activation_functions: [relu, tanh, leakyrelu] 
+reward_scale: [5, 50, 100]
+
+default:
+  seed: 521
+  batch_size: 1000
+  network_size:
+    policy_net: [256, 256]
+    q_function_net: [256, 256]
+  activation_functions: relu
+  layer_normalization: False
