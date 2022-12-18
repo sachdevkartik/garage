@@ -93,7 +93,9 @@ def sac_walker_batch(ctxt=None,
             discount=0.99,
             buffer_batch_size=256,
             reward_scale=reward_scale,
-            steps_per_epoch=1)
+            steps_per_epoch=1,
+            use_deterministic_evaluation=True,
+            fixed_alpha=None)
 
     if torch.cuda.is_available():
         set_gpu_mode(True)
@@ -113,8 +115,16 @@ def main():
         choices=["batch_size", "layer_normalization", "activation_functions", "policy_net", "q_function_net", "reward_scale"]
     )
 
+    parser.add_argument(
+        "--continue_training", 
+        help="continue stopped training", 
+        action="store_true",
+    )
+    parser.set_defaults(continue_training=False)
+
     args = parser.parse_args()
     hyperparameter_to_analyze = args.hyperparameter_to_analyze
+    continue_training = args.continue_training
 
     benchmark_config_file = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "benchmark_config.yml", 
@@ -129,6 +139,7 @@ def main():
     env = benchmark_config_data["env"]
     seeds = benchmark_config_data["seeds"]
     epochs = benchmark_config_data["epochs"]
+    combinations_to_skip = benchmark_config_data["combinations_to_skip"]
 
     batch_size_list = benchmark_config_data["batch_size_list"]
     policy_net_sizes = benchmark_config_data["network_size"]["policy_net"]
@@ -140,11 +151,15 @@ def main():
     for seed in seeds:
         if hyperparameter_to_analyze == "batch_size":
             for batch_size in  batch_size_list:
+                if [seed, batch_size] in combinations_to_skip and continue_training:
+                    continue
                 log_dirname = f"{algo}_{hyperparameter_to_analyze}_{str(batch_size)}_{seed}"
                 wrap_experiment(snapshot_mode='none', name=log_dirname)(sac_walker_batch)(seed=seed, n_epochs=epochs, batch_size=batch_size)
 
         elif hyperparameter_to_analyze == "layer_normalization":
             for layer_normalization in  layer_normalization_choices:
+                if [seed, layer_normalization] in combinations_to_skip and continue_training:
+                    continue
                 log_dirname = f"{algo}_{hyperparameter_to_analyze}_{str(layer_normalization)}_{seed}"
                 wrap_experiment(snapshot_mode='none', name=log_dirname)(sac_walker_batch)(seed=seed, n_epochs=epochs, layer_normalization=layer_normalization)
 

@@ -162,7 +162,7 @@ class Plotter:
         plt.show()
 
     def plot_eval_results(
-        self, hyperparameter_to_analyze, seeds, iteretable_list, log_path
+        self, hyperparameter_to_analyze, seeds, iteretable_list, log_path, smooth=1
     ):
         # plot for respective hyperparameter
         assert hyperparameter_to_analyze is not None, "specify which parameter to plot"
@@ -205,7 +205,7 @@ class Plotter:
                 all_avg_return,
                 all_min_return,
                 all_max_return,
-                sliding_window=1,
+                sliding_window=smooth,
                 color_fill=COLORS[i],
                 color_solid=COLORS[i],
                 label=value,
@@ -237,6 +237,7 @@ def main():
             "activation_functions",
             "policy_net",
             "q_function_net",
+            "reward_scale",
         ],
     )
 
@@ -257,10 +258,12 @@ def main():
 
     env = benchmark_config_data["env"]
     seeds = benchmark_config_data["seeds"]
+    seeds = [756]
     algo = benchmark_config_data["algo"]
     epochs = benchmark_config_data["epochs"]
 
     batch_size_list = benchmark_config_data["batch_size_list"]
+    batch_size_list = [1024]
     policy_net_sizes = benchmark_config_data["network_size"]["policy_net"]
     q_function_net_sizes = benchmark_config_data["network_size"]["q_function_net"]
     layer_normalization_choices = benchmark_config_data["layer_normalization"]
@@ -298,6 +301,7 @@ def main():
         seeds=seeds,
         iteretable_list=iteretable_list,
         log_path=log_path,
+        smooth=10,
     )
 
 

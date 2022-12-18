@@ -1,7 +1,7 @@
 algo: sac
 env: Hopper-v2 
-seeds: [756, 4239, 12345]
-epochs: 3
+seeds: [4239, 12345] # 756
+epochs: 400
 
 batch_size_list: [1024, 2048, 4096]
 network_size:
@@ -10,6 +10,9 @@ network_size:
 layer_normalization: [False, True]
 activation_functions: [relu, tanh, leakyrelu] 
 reward_scale: [5, 50, 100]
+use_deterministic_evaluation: [True, False]
+
+combinations_to_skip: [[4239, 1024]]
 
 default:
   seed: 521
