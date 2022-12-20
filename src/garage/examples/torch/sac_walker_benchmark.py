@@ -120,6 +120,13 @@ def main():
         help="continue stopped training", 
         action="store_true",
     )
+    
+    parser.add_argument(
+        "--epochs",
+        default=None, 
+        help="number of epochs", 
+    )
+
     parser.set_defaults(continue_training=False)
 
     args = parser.parse_args()
@@ -138,7 +145,8 @@ def main():
     algo = benchmark_config_data["algo"]
     env = benchmark_config_data["env"]
     seeds = benchmark_config_data["seeds"]
-    epochs = benchmark_config_data["epochs"]
+    epochs = int(args.epochs) if args.epochs else benchmark_config_data["epochs"] 
+    # epochs = benchmark_config_data["epochs"]
     combinations_to_skip = benchmark_config_data["combinations_to_skip"]
 
     batch_size_list = benchmark_config_data["batch_size_list"]

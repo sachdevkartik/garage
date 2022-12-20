@@ -1,7 +1,7 @@
 algo: sac
 env: Hopper-v2 
 seeds: [4239, 12345] # 756
-epochs: 400
+epochs: 500
 
 batch_size_list: [1024, 2048, 4096]
 network_size:
@@ -12,7 +12,7 @@ activation_functions: [relu, tanh, leakyrelu]
 reward_scale: [5, 50, 100]
 use_deterministic_evaluation: [True, False]
 
-combinations_to_skip: [[4239, 1024]]
+combinations_to_skip: [[4239, 1024], [4239, 2048]]
 
 default:
   seed: 521
